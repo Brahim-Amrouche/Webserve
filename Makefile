@@ -4,7 +4,7 @@ INCLUDES = -I./includes
 
 FLAGS = -Wall -Wextra -Werror -std=c++98 ${INCLUDES}
 
-SRCS = ${wildcard ./srcs/**/*.cpp} ${wildcard ./srcs/*.cpp} ${wildcard ./*.cpp}
+SRCS = ${wildcard ./src/**/*.cpp} ${wildcard ./src/*.cpp} ${wildcard ./*.cpp}
 
 CC = c++
 

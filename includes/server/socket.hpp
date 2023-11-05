@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:54:36 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/04 20:39:01 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/05 19:12:10 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+#include <unistd.h>
 #include <string>
 #include <iostream>
 #include <stdexcept>
@@ -26,35 +27,65 @@
 
 typedef int SOCKET_ID;
 typedef addrinfo ADDRESS_INFO;
+typedef sockaddr SOCK_ADDR_STORAGE;
+typedef socklen_t SOCK_ADDR_LEN;
 
 #define IPV4_AND_6 AF_UNSPEC
 #define TCP_SOCK SOCK_STREAM
 #define LISTEN_ON_HOST_NET AI_PASSIVE
+#define LISTEN_COUNT 1000
 
+#define ISVALIDSOCKET(s) (s >= 0)
 
 using std::string;
 using std::exception;
 using std::cerr;
 using std::cout;
+using std::endl;
+
+
+class SockExceptions : public exception
+{
+    private:
+        string *socket_msg;
+    public:
+        SockExceptions(const string addr, const string msg);
+        virtual const char *what() const throw();
+        virtual ~SockExceptions() throw();
+};
 
 class Socket
 {
     public:
-        class SocketOpenFailed: public exception
-        {
-            const char *what() const throw();
-        };
         class AddressLookUpFailed : public exception
         {
-            const char *what() const throw();  
+            public:
+                const char *what() const throw();  
         };
-        Socket(char *host, char *port);
+        class SocketOpenFailed: public SockExceptions
+        {
+            public:
+                SocketOpenFailed(const string addr);
+        };
+        class SocketBindFailed: public SockExceptions
+        {
+            public:
+                SocketBindFailed(const string addr);
+        };
+        class SocketListenFailed: public SockExceptions
+        {
+            public:
+                SocketListenFailed(const string addr);
+        };
         Socket(const char *host, const char *port);
-        Socket &operator=(const Socket &eq_sock);
+        void    sockBind() const;
+        void    sockConnect() const;
+        void    sockListen() const;
+        string getSocketInfo() const;
         ~Socket();
     private:
         SOCKET_ID sock_id;
         ADDRESS_INFO hints;
-        ADDRESS_INFO *bind_address;
-        
+        SOCK_ADDR_STORAGE sock_addr;
+        SOCK_ADDR_LEN   sock_addr_len;
 };
