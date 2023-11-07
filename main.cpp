@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:16:19 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/05 15:00:30 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/06 16:04:40 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ using std::endl;
 
 int main()
 {
-    server_listen("127.0.0.1", "8080");
+    Socket *listener = server_listen(NULL, "8080");
+    if (!listener)
+        return (1);
     
 }

@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 17:21:01 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/05 19:06:45 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/07 18:05:14 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,17 @@ Socket::SocketBindFailed::SocketBindFailed(const string addr):SockExceptions(add
 Socket::SocketListenFailed::SocketListenFailed(const string addr):SockExceptions(addr, "Listening failed on (")
 {};
 
+Socket::SocketAcceptFailed::SocketAcceptFailed(const string addr):SockExceptions(addr, "Accepting connection failed on (")
+{};
+
+Socket::Socket():sock_id(-1), sock_addr_len(0)
+{
+    ft_memset(&(sock_addr),0, sizeof(SOCK_ADDR_STORAGE));
+};
+
 Socket::Socket(const char *host, const char *port)
 {
+    ADDRESS_INFO hints;
     ft_memset(&hints, 0, sizeof(ADDRESS_INFO));
     hints.ai_family = IPV4_AND_6;
     hints.ai_socktype = TCP_SOCK;
@@ -87,8 +96,19 @@ void Socket::sockListen() const
     cout << "Socket listening on (" << sock_info << ")." << endl; 
 }
 
-void Socket::sockConnect() const
-{}
+Socket *Socket::sockAccept() const
+{
+    cout << "Accepting a new connection" << endl;
+    const string server_info = getSocketInfo();
+    Socket *client_socket = new Socket();
+    if (!client_socket)
+        throw Socket::SocketAcceptFailed(server_info);
+    client_socket->sock_id = accept(sock_id, &(client_socket->sock_addr), &(client_socket->sock_addr_len));
+    if (!ISVALIDSOCKET(client_socket->sock_id))
+        throw Socket::SocketListenFailed(server_info);
+    cout << "Client socket accepted at (" << client_socket->getSocketInfo() << ")." << endl;
+    return client_socket;
+}
 
 string Socket::getSocketInfo() const
 {
@@ -100,5 +120,6 @@ string Socket::getSocketInfo() const
 
 Socket::~Socket()
 {
-    close(sock_id);
+    if (sock_id >= 0)
+        close(sock_id);
 }

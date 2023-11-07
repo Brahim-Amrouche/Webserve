@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:54:36 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/05 19:12:10 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/07 16:14:27 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,15 @@ class SockExceptions : public exception
 
 class Socket
 {
+    private:
+        SOCKET_ID sock_id;
+        SOCK_ADDR_STORAGE sock_addr;
+        SOCK_ADDR_LEN   sock_addr_len;
     public:
         class AddressLookUpFailed : public exception
         {
             public:
-                const char *what() const throw();  
+                const char *what() const throw();
         };
         class SocketOpenFailed: public SockExceptions
         {
@@ -77,15 +81,16 @@ class Socket
             public:
                 SocketListenFailed(const string addr);
         };
+        class SocketAcceptFailed: public SockExceptions
+        {
+            public:
+                SocketAcceptFailed(const string addr);  
+        };
+        Socket();
         Socket(const char *host, const char *port);
         void    sockBind() const;
-        void    sockConnect() const;
         void    sockListen() const;
-        string getSocketInfo() const;
+        Socket  *sockAccept() const;
+        string  getSocketInfo() const;
         ~Socket();
-    private:
-        SOCKET_ID sock_id;
-        ADDRESS_INFO hints;
-        SOCK_ADDR_STORAGE sock_addr;
-        SOCK_ADDR_LEN   sock_addr_len;
 };
