@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:42:29 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/06 16:25:34 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/08 15:22:30 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,4 +16,5 @@
 #include "./loadbalancer.hpp"
 #include "./client.hpp"
 
-Socket   *server_listen(const string host,const string port);
+Socket   *server_init(const string host,const string port);
+void     server_listen(Socket *server);

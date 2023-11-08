@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 17:21:01 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/07 18:05:14 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/08 17:39:18 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,12 @@ const char *Socket::AddressLookUpFailed::what() const throw()
     return "Address Lookup Failed";
 }
 
-SockExceptions::SockExceptions(const string addr, const string msg)
+SockExceptions::SockExceptions(const string addr, const string msg, const Socket *del)
 {
     socket_msg = new string(msg);
     socket_msg->append(addr);
     socket_msg->push_back(')');
+    del->~Socket();
 }
 
 const char *SockExceptions::what() const throw()
@@ -34,16 +35,16 @@ SockExceptions::~SockExceptions() throw()
     delete socket_msg;
 }
 
-Socket::SocketOpenFailed::SocketOpenFailed(const string addr):SockExceptions(addr, "Openning socket failed on (")
+Socket::SocketOpenFailed::SocketOpenFailed(const string addr, const Socket *del):SockExceptions(addr, "Openning socket failed on (", del)
 {}
 
-Socket::SocketBindFailed::SocketBindFailed(const string addr):SockExceptions(addr, "Binding socket failed on (")
+Socket::SocketBindFailed::SocketBindFailed(const string addr, const Socket *del):SockExceptions(addr, "Binding socket failed on (", del)
 {};
 
-Socket::SocketListenFailed::SocketListenFailed(const string addr):SockExceptions(addr, "Listening failed on (")
+Socket::SocketListenFailed::SocketListenFailed(const string addr, const Socket *del):SockExceptions(addr, "Listening failed on (",del)
 {};
 
-Socket::SocketAcceptFailed::SocketAcceptFailed(const string addr):SockExceptions(addr, "Accepting connection failed on (")
+Socket::SocketAcceptFailed::SocketAcceptFailed(const string addr, const Socket *del):SockExceptions(addr, "Accepting connection failed on (", del)
 {};
 
 Socket::Socket():sock_id(-1), sock_addr_len(0)
@@ -72,7 +73,7 @@ Socket::Socket(const char *host, const char *port)
     if (!ISVALIDSOCKET(sock_id))
     {
         freeaddrinfo(bind_address);
-        throw Socket::SocketOpenFailed(getSocketInfo());
+        throw Socket::SocketOpenFailed(getSocketInfo(), this);
     }
     cout << "Socket successfully opened." << endl;
     freeaddrinfo(bind_address);
@@ -83,7 +84,7 @@ void Socket::sockBind() const
     const string sock_info = getSocketInfo(); 
     cout << "Binding Socket on (" << sock_info << ")..." << endl;
     if (bind(sock_id, &sock_addr, sock_addr_len))
-        throw Socket::SocketBindFailed(sock_info);
+        throw Socket::SocketBindFailed(sock_info, this);
     cout << "Binding successfully completed on (" << sock_info << ")." << endl;
 }
 
@@ -92,7 +93,7 @@ void Socket::sockListen() const
     const string sock_info = getSocketInfo(); 
     cout << "Attempting to listen on (" << sock_info << ")..." << endl;
     if (listen(sock_id, LISTEN_COUNT))
-        throw Socket::SocketListenFailed(sock_info);
+        throw Socket::SocketListenFailed(sock_info, this);
     cout << "Socket listening on (" << sock_info << ")." << endl; 
 }
 
@@ -102,12 +103,23 @@ Socket *Socket::sockAccept() const
     const string server_info = getSocketInfo();
     Socket *client_socket = new Socket();
     if (!client_socket)
-        throw Socket::SocketAcceptFailed(server_info);
+        throw Socket::SocketAcceptFailed(server_info, this);
     client_socket->sock_id = accept(sock_id, &(client_socket->sock_addr), &(client_socket->sock_addr_len));
     if (!ISVALIDSOCKET(client_socket->sock_id))
-        throw Socket::SocketListenFailed(server_info);
+        throw Socket::SocketListenFailed(server_info, this);
     cout << "Client socket accepted at (" << client_socket->getSocketInfo() << ")." << endl;
     return client_socket;
+}
+
+void Socket::fill_epoll_event(EPOLL_EVENT *e_event, uint32_t mode) const
+{
+    e_event->events = mode;
+    e_event->data.fd = sock_id;
+}
+
+SOCKET_ID Socket::get_sockid() const
+{
+    return sock_id;
 }
 
 string Socket::getSocketInfo() const

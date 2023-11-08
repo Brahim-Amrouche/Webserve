@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:54:36 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/07 16:14:27 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/08 17:36:15 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ typedef int SOCKET_ID;
 typedef addrinfo ADDRESS_INFO;
 typedef sockaddr SOCK_ADDR_STORAGE;
 typedef socklen_t SOCK_ADDR_LEN;
+typedef epoll_event EPOLL_EVENT;
 
 #define IPV4_AND_6 AF_UNSPEC
 #define TCP_SOCK SOCK_STREAM
@@ -43,13 +44,14 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
+class Socket;
 
 class SockExceptions : public exception
 {
     private:
         string *socket_msg;
     public:
-        SockExceptions(const string addr, const string msg);
+        SockExceptions(const string addr, const string msg, const Socket *del);
         virtual const char *what() const throw();
         virtual ~SockExceptions() throw();
 };
@@ -69,28 +71,30 @@ class Socket
         class SocketOpenFailed: public SockExceptions
         {
             public:
-                SocketOpenFailed(const string addr);
+                SocketOpenFailed(const string addr, const Socket *del);
         };
         class SocketBindFailed: public SockExceptions
         {
             public:
-                SocketBindFailed(const string addr);
+                SocketBindFailed(const string addr, const Socket *del);
         };
         class SocketListenFailed: public SockExceptions
         {
             public:
-                SocketListenFailed(const string addr);
+                SocketListenFailed(const string addr,const Socket *del);
         };
         class SocketAcceptFailed: public SockExceptions
         {
             public:
-                SocketAcceptFailed(const string addr);  
+                SocketAcceptFailed(const string addr, const Socket *del);  
         };
         Socket();
         Socket(const char *host, const char *port);
         void    sockBind() const;
         void    sockListen() const;
         Socket  *sockAccept() const;
+        void    fill_epoll_event(EPOLL_EVENT *e_event, uint32_t mode) const;
+        SOCKET_ID get_sockid() const;
         string  getSocketInfo() const;
         ~Socket();
 };
