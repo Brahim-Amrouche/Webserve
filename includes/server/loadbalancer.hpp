@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:48:34 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/08 17:14:37 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 12:01:28 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,22 @@ class LoadBalancer
             public:
                 EpollWaitFailed(const string msg, const LoadBalancer *del);
         };
+        class CreatingClientFailed : public LoadBalancerExceptions
+        {
+            public:
+                CreatingClientFailed(const string msg);
+        };
+        class LoadBalancerOutOfMemory : public LoadBalancerExceptions
+        {
+            public:
+                LoadBalancerOutOfMemory(const string msg);
+        };
         LoadBalancer(Socket *server);
         void loop();
+        void new_client();
+        void receive();
+        void send();
+        EPOLL_EVENT *get_connections() const;
         ~LoadBalancer();
 };
 

@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:56:18 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/08 17:47:55 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 13:00:57 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,9 @@ void    server_listen(Socket *server)
 {
     try
     {
-        LoadBalancer  load(server);
-        load.loop();
+        LoadBalancer  *load = new LoadBalancer(server);
+        load->loop();
+        delete load;
     }
     catch (const LoadBalancer::EpollInitFailed &e)
     {

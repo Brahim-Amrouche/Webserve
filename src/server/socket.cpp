@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 17:21:01 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/08 17:39:18 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 13:00:25 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ SockExceptions::SockExceptions(const string addr, const string msg, const Socket
     socket_msg = new string(msg);
     socket_msg->append(addr);
     socket_msg->push_back(')');
-    del->~Socket();
+    if (del)
+        delete del;
 }
 
 const char *SockExceptions::what() const throw()
@@ -64,7 +65,7 @@ Socket::Socket(const char *host, const char *port)
     cout << "Looking for address info..." << endl;
     int dns_lookup_res = getaddrinfo(host, port, &hints, &bind_address);
     if (dns_lookup_res > 0)
-        throw Socket::AddressLookUpFailed();
+        throw AddressLookUpFailed();
     ft_memcpy(&sock_addr, bind_address->ai_addr,sizeof(SOCK_ADDR_STORAGE));
     sock_addr_len = bind_address->ai_addrlen;
     cout << "Address info found (" << getSocketInfo() << ")." << endl;
@@ -73,7 +74,7 @@ Socket::Socket(const char *host, const char *port)
     if (!ISVALIDSOCKET(sock_id))
     {
         freeaddrinfo(bind_address);
-        throw Socket::SocketOpenFailed(getSocketInfo(), this);
+        throw SocketOpenFailed(getSocketInfo(), this);
     }
     cout << "Socket successfully opened." << endl;
     freeaddrinfo(bind_address);
@@ -84,7 +85,7 @@ void Socket::sockBind() const
     const string sock_info = getSocketInfo(); 
     cout << "Binding Socket on (" << sock_info << ")..." << endl;
     if (bind(sock_id, &sock_addr, sock_addr_len))
-        throw Socket::SocketBindFailed(sock_info, this);
+        throw SocketBindFailed(sock_info, this);
     cout << "Binding successfully completed on (" << sock_info << ")." << endl;
 }
 
@@ -93,7 +94,7 @@ void Socket::sockListen() const
     const string sock_info = getSocketInfo(); 
     cout << "Attempting to listen on (" << sock_info << ")..." << endl;
     if (listen(sock_id, LISTEN_COUNT))
-        throw Socket::SocketListenFailed(sock_info, this);
+        throw SocketListenFailed(sock_info, this);
     cout << "Socket listening on (" << sock_info << ")." << endl; 
 }
 
@@ -106,7 +107,7 @@ Socket *Socket::sockAccept() const
         throw Socket::SocketAcceptFailed(server_info, this);
     client_socket->sock_id = accept(sock_id, &(client_socket->sock_addr), &(client_socket->sock_addr_len));
     if (!ISVALIDSOCKET(client_socket->sock_id))
-        throw Socket::SocketListenFailed(server_info, this);
+        throw Socket::SocketAcceptFailed(server_info, this);
     cout << "Client socket accepted at (" << client_socket->getSocketInfo() << ")." << endl;
     return client_socket;
 }

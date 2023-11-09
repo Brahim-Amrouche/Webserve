@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/08 17:38:04 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 13:12:37 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ ClientExceptions::ClientExceptions(const string addr, const string msg, const Cl
     client_msg = new string(msg);
     client_msg->append(addr);
     client_msg->push_back(')');
-    del->~Client();
+    if (del)
+        delete del;
 }
 
 const char *ClientExceptions::what() const throw()
@@ -33,17 +34,13 @@ ClientExceptions::~ClientExceptions() throw()
 Client::ClientRemovalFailed::ClientRemovalFailed(const string addr, const Client *del):ClientExceptions(addr, "Couldn't remove client (", del)
 {};
 
-Client::Client():socket(NULL), received(0), next(NULL)
-{
-    ft_memset(&client_event, 0, sizeof(EPOLL_EVENT));
-};
+Client::Client():socket(NULL), received(0), next(NULL), event_index(-1)
+{};
 
-Client::Client(Socket *new_socket)
+Client::Client(Socket *new_socket, int new_event_index, EPOLL_EVENT *events): socket(new_socket), received(0)
+    , next(NULL), event_index(new_event_index)
 {
-    socket = new_socket;
-    received = 0;
-    next = NULL;
-    socket->fill_epoll_event(&client_event, EPOLLIN | EPOLLOUT);
+    socket->fill_epoll_event(&(events[event_index]), EPOLLIN | EPOLLOUT);
 };
 
 void Client::add_client(Client *new_client)
@@ -88,7 +85,7 @@ void    Client::remove_all(Client *root_client)
         delete root_client;
         root_client = next_p;
     }
-    cout << "All clients delete succesfully" << endl;
+    cout << "All clients deleted succesfully" << endl;
 }
 
 Client::~Client()
