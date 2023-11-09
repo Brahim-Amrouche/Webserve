@@ -6,13 +6,16 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:48:34 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 12:01:28 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 17:34:38 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #include "socket.hpp"
 #include "client.hpp"
+#include <queue>
+
+using std::queue;
 
 class LoadBalancer;
 
@@ -35,6 +38,8 @@ class LoadBalancer
         EPOLL_EVENT *connections;
         int  load;
         Client  *clients;
+        queue<int> free_connections;
+        int   extend_capacity();
     public:
         class EpollInitFailed : public LoadBalancerExceptions
         {
@@ -63,10 +68,10 @@ class LoadBalancer
         };
         LoadBalancer(Socket *server);
         void loop();
-        void new_client();
+        void new_connection();
         void receive();
         void send();
-        EPOLL_EVENT *get_connections() const;
+        Client *remove_connection(Client *connection);
         ~LoadBalancer();
 };
 

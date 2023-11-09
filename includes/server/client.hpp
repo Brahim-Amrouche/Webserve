@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 16:17:32 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 12:15:16 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 18:58:11 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,20 @@ class Client
             public :
                 ClientRemovalFailed(const string addr, const Client *del);
         };
+        class ClientReceiveFailed : public ClientExceptions
+        {
+            public :
+                ClientReceiveFailed(const string addr);
+        };
         Client();
         Client(Socket *new_socket, int new_event_index, EPOLL_EVENT *events);
         void add_client(Client *new_client);
-        void remove_client(Client *del_client);
+        EPOLL_EVENT *get_event(EPOLL_EVENT *events) const;
+        int get_event_index() const;
+        Client *get_next() const;
+        void receive();
         void reset_request();
-        EPOLL_EVENT *get_event();
+        static void remove_client(Client **root, Client *del_client);
         static void remove_all(Client *root_client);
         ~Client();
 };

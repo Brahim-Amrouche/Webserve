@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 13:12:37 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 19:00:04 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ ClientExceptions::~ClientExceptions() throw()
 Client::ClientRemovalFailed::ClientRemovalFailed(const string addr, const Client *del):ClientExceptions(addr, "Couldn't remove client (", del)
 {};
 
+Client::ClientReceiveFailed::ClientReceiveFailed(const string addr): ClientExceptions(addr, "Receive request interrupted", NULL)
+{};
+
 Client::Client():socket(NULL), received(0), next(NULL), event_index(-1)
 {};
 
@@ -46,35 +49,64 @@ Client::Client(Socket *new_socket, int new_event_index, EPOLL_EVENT *events): so
 void Client::add_client(Client *new_client)
 {
     Client *p = this;
-    const string client_info = new_client->socket->getSocketInfo();
     while (p->next)
         p = this->next;
     p->next = new_client;
-    cout << "Added client to the list(" << client_info << ")" << endl;
+    cout << "Added client to the list(" << new_client->get_event_index() << ")" << endl;
 }
 
-void Client::remove_client(Client *del_client)
+void Client::remove_client(Client **root,  Client *del_client)
 {
-    Client **p_clients = &(this->next);
-    const string client_info = del_client->socket->getSocketInfo();
-    while (*p_clients)
+    while (*root)
     {
-        if (*p_clients == del_client)
+        if (*root == del_client)
         {
-            cout << "Disconected client (" << client_info << ")" << endl;
-            *p_clients = del_client->next;
+            cout << "Disconected client worker (" << del_client->get_event_index() << ")" << endl;
+            *root = del_client->next;
             delete del_client;
             return;
         }
-        p_clients = &((*p_clients)->next);
+        root = &((*root)->next);
     }
-    throw ClientRemovalFailed(client_info, this);
+    throw ClientRemovalFailed("", NULL);
 }
 
 void Client::reset_request()
 {
     received = 0;
 }
+
+EPOLL_EVENT *Client::get_event(EPOLL_EVENT *events) const
+{
+    return &(events[event_index]);
+}
+
+int Client::get_event_index() const
+{
+    return event_index;
+}
+
+Client *Client::get_next() const
+{
+    return (next);
+}
+
+void Client::receive()
+{
+    cout << "Receiving request on worker (" << event_index << ")" << endl;
+    int r = recv(socket->get_sockid(), request, MAX_REQUEST_SIZE - received, 0);
+    if (r < 1)
+        throw ClientReceiveFailed("0.0.0.0");
+    else
+    {
+        received += r;
+        request[received] = 0;
+        cout << "Request received from worker (" << event_index << ")" << endl;
+        cout << "request is:" << endl;
+        cout << request << endl;
+    }
+}
+
 
 void    Client::remove_all(Client *root_client)
 {
@@ -87,6 +119,7 @@ void    Client::remove_all(Client *root_client)
     }
     cout << "All clients deleted succesfully" << endl;
 }
+
 
 Client::~Client()
 {

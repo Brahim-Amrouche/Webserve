@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:54:36 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/08 17:36:15 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 17:55:33 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 
 typedef int SOCKET_ID;
@@ -40,6 +41,7 @@ typedef epoll_event EPOLL_EVENT;
 
 using std::string;
 using std::exception;
+using std::ostringstream;
 using std::cerr;
 using std::cout;
 using std::endl;

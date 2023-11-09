@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 15:56:06 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 13:11:01 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/09 19:01:42 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,44 +66,56 @@ void LoadBalancer::loop()
         events_trigered = epoll_wait(epoll_fd, connections, load, 1000);
         if (events_trigered == -1)
             throw EpollWaitFailed("Epoll wait failed", this);
-        if (events_trigered)
+        if (events_trigered > 0)
         {
-            new_client();
-            break;
+            new_connection();
+            receive();
+            // return;
         }
         else
             cout << "listenning..." << endl;
     }
 }
 
-void LoadBalancer::new_client()
+int LoadBalancer::extend_capacity()
+{
+    cout << "extending server capacity" << endl;
+    EPOLL_EVENT *new_connections = new EPOLL_EVENT[load + 1];
+    if (!new_connections)
+        throw LoadBalancerOutOfMemory("Couldn't allocate for new events");
+    ft_memcpy(new_connections, connections, sizeof(EPOLL_EVENT) * load);
+    delete[] connections;
+    connections = new_connections;
+    return load;
+}
+
+void LoadBalancer::new_connection()
 {
     if (connections[0].events & EPOLLIN)
     {
         try
         {
+            int event_index = -1;
             Socket *new_client_socket = listener->sockAccept();
-            EPOLL_EVENT *new_connections = new EPOLL_EVENT[load + 1];
-            if (!new_connections)
-                throw LoadBalancerOutOfMemory("Couldn't allocate for new events");
-            ft_memcpy(new_connections, connections, sizeof(EPOLL_EVENT) * load);
-            delete[] connections;
-            connections = new_connections;
-            if (!clients)
+            if (free_connections.empty())
             {
-                clients = new Client(new_client_socket, load, new_connections);
-                if (!clients)
-                    throw CreatingClientFailed("Couldn't allocate for a new client");
+                event_index = extend_capacity();
                 ++load;
             }
             else
             {
-                Client *new_client = new Client(new_client_socket, load, new_connections);
-                if (!new_client)
-                    throw CreatingClientFailed("Couldn't add a new client");
-                clients->add_client(new_client);
-                ++load;
+                cout << "from the free events" << endl;
+                event_index = free_connections.front();
+                free_connections.pop();
             }
+            Client *new_client = new Client(new_client_socket, event_index, connections);
+            if (!new_client)
+                throw CreatingClientFailed("Couldn't add a new client");
+            if (clients)
+                clients->add_client(new_client);
+            else
+                clients = new_client;
+            cout << "New client at (" << event_index << ")" << endl;
         }
         catch(const Socket::SocketAcceptFailed &e)
         {
@@ -120,9 +132,42 @@ void LoadBalancer::new_client()
     }
 }
 
-EPOLL_EVENT *LoadBalancer::get_connections() const
+void    LoadBalancer::receive()
 {
-    return connections;
+    Client *senders = clients;
+    while (senders)
+    {
+        EPOLL_EVENT *client_event = senders->get_event(connections);
+        if (client_event->events & EPOLLIN)
+        {
+            try 
+            {
+                senders->receive();
+            }
+            catch (const Client::ClientReceiveFailed &e)
+            {
+                cerr << e.what() << endl;
+                senders = remove_connection(senders);
+                continue ;
+            }
+        }
+        senders = senders->get_next(); 
+    }
+}
+
+Client *LoadBalancer::remove_connection(Client *connection)
+{
+    free_connections.push(connection->get_event_index());
+    Client *next = connection->get_next();
+    try
+    {
+        Client::remove_client(&clients, connection);
+    }
+    catch (const Client::ClientRemovalFailed &e)
+    {
+        cerr << e.what() << endl;
+    }
+    return next;
 }
 
 LoadBalancer::~LoadBalancer()
