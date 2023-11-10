@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 19:00:04 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/10 19:13:17 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,16 +34,16 @@ ClientExceptions::~ClientExceptions() throw()
 Client::ClientRemovalFailed::ClientRemovalFailed(const string addr, const Client *del):ClientExceptions(addr, "Couldn't remove client (", del)
 {};
 
-Client::ClientReceiveFailed::ClientReceiveFailed(const string addr): ClientExceptions(addr, "Receive request interrupted", NULL)
+Client::ClientReceiveFailed::ClientReceiveFailed(const string addr): ClientExceptions(addr, "Receive request interrupted (", NULL)
 {};
 
-Client::Client():socket(NULL), received(0), next(NULL), event_index(-1)
+Client::Client():socket(NULL), received(0), next(NULL)
 {};
 
-Client::Client(Socket *new_socket, int new_event_index, EPOLL_EVENT *events): socket(new_socket), received(0)
-    , next(NULL), event_index(new_event_index)
+Client::Client(Socket *new_socket): socket(new_socket), received(0)
+    , next(NULL)
 {
-    socket->fill_epoll_event(&(events[event_index]), EPOLLIN | EPOLLOUT);
+    cout << "Created Client with socket id (" << socket->get_sockid() << ")" << endl;
 };
 
 void Client::add_client(Client *new_client)
@@ -52,7 +52,36 @@ void Client::add_client(Client *new_client)
     while (p->next)
         p = this->next;
     p->next = new_client;
-    cout << "Added client to the list(" << new_client->get_event_index() << ")" << endl;
+    cout << "Added client to the list (" << socket->get_sockid() << ")" << endl;
+}
+
+
+void Client::reset_request()
+{
+    received = 0;
+}
+
+Client *Client::get_next() const
+{
+    return (next);
+}
+
+SOCKET_ID Client::get_socketid() const
+{
+    return socket->get_sockid();
+}
+
+void Client::receive()
+{
+    cout << "Receiving request on socket (" << socket->get_sockid() << ")" << endl;
+    int r = recv(socket->get_sockid(), request, MAX_REQUEST_SIZE - received, 0);
+    if (r <= 0)
+        throw ClientReceiveFailed("0.0.0.0");
+    else
+    {
+        received += r;
+        request[received] = 0;
+    }
 }
 
 void Client::remove_client(Client **root,  Client *del_client)
@@ -61,7 +90,7 @@ void Client::remove_client(Client **root,  Client *del_client)
     {
         if (*root == del_client)
         {
-            cout << "Disconected client worker (" << del_client->get_event_index() << ")" << endl;
+            cout << "Disconected client (" << del_client->socket->get_sockid() << ")" << endl;
             *root = del_client->next;
             delete del_client;
             return;
@@ -70,43 +99,6 @@ void Client::remove_client(Client **root,  Client *del_client)
     }
     throw ClientRemovalFailed("", NULL);
 }
-
-void Client::reset_request()
-{
-    received = 0;
-}
-
-EPOLL_EVENT *Client::get_event(EPOLL_EVENT *events) const
-{
-    return &(events[event_index]);
-}
-
-int Client::get_event_index() const
-{
-    return event_index;
-}
-
-Client *Client::get_next() const
-{
-    return (next);
-}
-
-void Client::receive()
-{
-    cout << "Receiving request on worker (" << event_index << ")" << endl;
-    int r = recv(socket->get_sockid(), request, MAX_REQUEST_SIZE - received, 0);
-    if (r < 1)
-        throw ClientReceiveFailed("0.0.0.0");
-    else
-    {
-        received += r;
-        request[received] = 0;
-        cout << "Request received from worker (" << event_index << ")" << endl;
-        cout << "request is:" << endl;
-        cout << request << endl;
-    }
-}
-
 
 void    Client::remove_all(Client *root_client)
 {
@@ -120,6 +112,16 @@ void    Client::remove_all(Client *root_client)
     cout << "All clients deleted succesfully" << endl;
 }
 
+Client *Client::find_client_by_socketid(Client *root, SOCKET_ID id)
+{
+    while (root)
+    {
+        if (root->get_socketid() == id)
+            return root;
+        root = root->get_next();
+    }
+    return NULL;
+}
 
 Client::~Client()
 {

@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:48:34 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 17:34:38 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/10 19:14:23 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include "socket.hpp"
 #include "client.hpp"
 #include <queue>
+
+#define MAX_EVENTS 1024
 
 using std::queue;
 
@@ -35,11 +37,10 @@ class LoadBalancer
     private:
         Socket *listener;
         int     epoll_fd;
-        EPOLL_EVENT *connections;
+        EPOLL_EVENT events[MAX_EVENTS];
+        int  events_trigered;
         int  load;
         Client  *clients;
-        queue<int> free_connections;
-        int   extend_capacity();
     public:
         class EpollInitFailed : public LoadBalancerExceptions
         {
@@ -68,10 +69,11 @@ class LoadBalancer
         };
         LoadBalancer(Socket *server);
         void loop();
-        void new_connection();
-        void receive();
-        void send();
-        Client *remove_connection(Client *connection);
+        void new_connection(int event_id);
+        void handle_clients_request();
+        void receive(Client *sender, EPOLL_EVENT *event);
+        void send(Client *receiver, EPOLL_EVENT *event);
+        void remove_connection(Client *connection);
         ~LoadBalancer();
 };
 
