@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/10 19:13:17 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/11 21:53:33 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,11 @@ Client *Client::get_next() const
     return (next);
 }
 
+Socket *Client::get_socket() const
+{
+    return socket;
+}
+
 SOCKET_ID Client::get_socketid() const
 {
     return socket->get_sockid();
@@ -82,6 +87,12 @@ void Client::receive()
         received += r;
         request[received] = 0;
     }
+}
+
+void Client::send()
+{
+    cout << "Sending response on socket (" << socket->get_sockid() << ")" << endl;
+    // int s = send();
 }
 
 void Client::remove_client(Client **root,  Client *del_client)

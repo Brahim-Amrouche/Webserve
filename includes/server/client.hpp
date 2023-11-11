@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 16:17:32 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/10 19:01:33 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/11 19:00:43 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,8 @@ class Client
         Client();
         Client(Socket *new_socket);
         void add_client(Client *new_client);
-        EPOLL_EVENT *get_event(EPOLL_EVENT *events) const;
         Client *get_next() const;
+        Socket *get_socket() const;
         SOCKET_ID get_socketid() const;
         void receive();
         void send();

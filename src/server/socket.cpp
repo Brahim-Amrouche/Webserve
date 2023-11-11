@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 17:21:01 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 17:50:07 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/11 18:53:42 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void Socket::sockListen() const
 {
     const string sock_info = getSocketInfo(); 
     cout << "Attempting to listen on (" << sock_info << ")..." << endl;
-    if (listen(sock_id, LISTEN_COUNT))
+    if (listen(sock_id, SOMAXCONN))
         throw SocketListenFailed(sock_info, this);
     cout << "Socket listening on (" << sock_info << ")." << endl; 
 }
