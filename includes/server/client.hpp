@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 16:17:32 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/11 19:00:43 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/12 09:49:16 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class Client
         Socket *get_socket() const;
         SOCKET_ID get_socketid() const;
         void receive();
-        void send();
+        void send_response();
         void reset_request();
         static void remove_client(Client **root, Client *del_client);
         static void remove_all(Client *root_client);

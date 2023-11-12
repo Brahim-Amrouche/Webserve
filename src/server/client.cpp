@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/11 21:53:33 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/12 09:38:13 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,10 +89,11 @@ void Client::receive()
     }
 }
 
-void Client::send()
+void Client::send_response()
 {
     cout << "Sending response on socket (" << socket->get_sockid() << ")" << endl;
-    // int s = send();
+    const char* response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!";
+    send(socket->get_sockid(), response, ft_strlen(response), 0);
 }
 
 void Client::remove_client(Client **root,  Client *del_client)

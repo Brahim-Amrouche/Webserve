@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:48:34 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/11 21:46:50 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/12 09:49:37 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ class LoadBalancer
         void loop();
         void new_connection(int event_id);
         void handle_clients_request();
-        void receive(Client *sender);
+        bool receive(Client *sender);
         void send(Client *receiver);
         void remove_connection(Client *connection);
         ~LoadBalancer();

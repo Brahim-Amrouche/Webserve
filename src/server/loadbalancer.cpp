@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 15:56:06 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/11 21:47:42 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/12 09:55:07 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ LoadBalancer::LoadBalancer(Socket *server):listener(server), events_trigered(0) 
     if (epoll_fd == -1)
         throw EpollInitFailed("Couldn't create an epoll instance", this);
     ft_memset(&(events[0]), 0, sizeof(EPOLL_EVENT));
-    listener->fill_epoll_event(&(events[0]), EPOLLIN);
+    listener->fill_epoll_event(&(events[0]), EPOLLIN | EPOLLET);
     if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, listener->get_sockid(), &(events[0])) == -1)
         throw EpollCtlFailed("Couldn't add the servers events listener", this);
     ++load;
@@ -89,16 +89,14 @@ void    LoadBalancer::handle_clients_request()
             Client *event_client = Client::find_client_by_socketid(clients, events[i].data.fd);
             if (event_client)
             {
+                bool client_alive;
                 if (events[i].events & EPOLLIN)
-                    receive(event_client, &(events[i]));
-                if (events[i].events & EPOLLOUT)
-                    cout << "client ready to receive" << endl;
-                // here check if the connection is removed;
-                // send(event_client, &(events[i]));
+                    client_alive = receive(event_client);
+                if (client_alive && (events[i].events & EPOLLOUT))
+                    send(event_client);
             }
         }
     }
-    cout << "last epoll data" << events[i].events   << " fd is :" << events[i].events << endl;
 }
 
 void LoadBalancer::new_connection(int event_id)
@@ -109,7 +107,7 @@ void LoadBalancer::new_connection(int event_id)
         Client *new_client = new Client(new_client_socket);
         if (!new_client)
             throw CreatingClientFailed("Couldn't add a new client");
-        new_client_socket->fill_epoll_event(&(events[event_id]), EPOLLIN | EPOLLOUT);
+        new_client_socket->fill_epoll_event(&(events[event_id]), EPOLLIN | EPOLLOUT | EPOLLET);
         if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, new_client_socket->get_sockid(), &(events[event_id])) == -1)
             throw EpollCtlFailed("Unable to Track a new Client", NULL);
         ft_memset(&(events[event_id]), 0, sizeof(EPOLL_EVENT));
@@ -137,24 +135,27 @@ void LoadBalancer::new_connection(int event_id)
         cerr << e.what() << endl;
     }
 }
-void    LoadBalancer::receive(Client *sender)
+
+bool    LoadBalancer::receive(Client *sender)
 {
     try 
     {
         sender->receive();
+        return true;
     }
     catch (const Client::ClientReceiveFailed &e)
     {
         cerr << e.what() << endl;
         remove_connection(sender);
     }
+    return false;
 }
 
 void    LoadBalancer::send(Client *receiver)
 {
     try
     {
-        receiver->send();
+        receiver->send_response();
     }
     catch(const std::exception& e)
     {
