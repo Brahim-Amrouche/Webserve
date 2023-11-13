@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: maboulkh <maboulkh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 19:03:03 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/07 14:45:16 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/13 17:36:35 by maboulkh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,4 +15,5 @@
 #include "./config/config.hpp"
 #include "./helpers/helpers.hpp"
 #include "./server/server.hpp"
+#include "./server/cgi.hpp"
 
