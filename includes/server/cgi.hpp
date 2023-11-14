@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
+/*   By: maboulkh <maboulkh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/13 17:20:56 by maboulkh          #+#    #+#             */
-/*   Updated: 2023/11/14 03:14:49 by elasce           ###   ########.fr       */
+/*   Updated: 2023/11/14 22:36:30 by maboulkh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <sys/types.h>
+#include <wait.h>
 #include <errno.h>
 #include <unistd.h>
 #include <string>
@@ -21,6 +22,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <cstdio>
+#include <map>
 
 using std::exception;
 using std::string;
@@ -55,30 +57,36 @@ class Cgi
     string HTTP_COOKIE;
     string HTTP_USER_AGENT;
 
+    std::map<std::string, std::string>* requestMap;
     std::string body;
-    std::string bodyLength;
+    size_t bodyLength;
     std::string *arg;
     std::string *env;
     std::string path;
     std::FILE* out;
     std::FILE* in;
-    
 
     public:
-        class AddressLookUpFailed : public exception
+        // class CgiOpenInFileFailed: public CgiExceptions
+        // {
+        //     public:
+        //         CgiOpenFailed(const string addr, const Cgi *del);
+        // };
+        class CgiOpenInFileFailed: public CgiExceptions
         {
             public:
                 const char *what() const throw();
         };
-        class CgiOpenFailed: public CgiExceptions
+        class CgiOpenOutFileFailed : public exception
         {
             public:
-                CgiOpenFailed(const string addr, const Cgi *del);
+                const char *what() const throw();
         };
         Cgi();
         Cgi(const char *host, const char *port);
         ~Cgi();
         
-        lunchScript();
-        makeEnv();
+        void lunchScript();
+        void makeEnv();
+        void prepareFiles();
 };
