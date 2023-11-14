@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maboulkh <maboulkh@student.42.fr>          +#+  +:+       +#+        */
+/*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/13 17:20:54 by maboulkh          #+#    #+#             */
-/*   Updated: 2023/11/13 23:22:07 by maboulkh         ###   ########.fr       */
+/*   Updated: 2023/11/14 03:16:38 by elasce           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,28 +34,62 @@ SockExceptions::~SockExceptions() throw()
     delete socket_msg;
 }
 
-Cgi::Cgi(void)
-{
-    in.open("inFile");
-    in.rdbuf()->operator=;
-    if (!in.is_open())
+Cgi::Cgi(void) {
+    body = "hello world";
+    body += "\n here we are!"
+    bodyLength = body.length();
+    in = std::tmpfile();
+    if (!in)
     {
-        //
+        //throw
     }
-    out.open("outFile");
-    if (!out.is_open())
+    std::fwrite(body, 1, bodyLength, in);
+    std::fseek(in, 0, SEEK_SET);
+    out = std::tmpfile();
+    if (!out)
     {
-        in.close();
-        //
+        //throw
     }
-    
 
+    int status = 0;
+    int pid = fork();
+    switch (pid)
+    {
+        case -1:
+            // throw
+            break;
+        case 0:
+            lunchScript();
+            break;
+        default:
+            waitpid(pid, &status, 0);
+    }
+    std::fclose(in);
+    
+}
+
+Cgi::lunchScript(void) {
+    int fdIn = std::fileno(in);
+    int fdOut = std::fileno(out);
+
+    dup2(fdIn, 0);
+    dup2(fdOut, 1);
+    if (chdir(path.c_str()) != 0)
+        ;//throw
+    execve(arg[0], arg, env);
+}
+
+Cgi::makeEnv() {
+    
 }
 
 Cgi::Cgi(const char *host, const char *port)
 {
+
 }
 
 Cgi::~Cgi()
 {
+
+    std::fclose(out);
 }

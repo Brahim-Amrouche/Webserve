@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maboulkh <maboulkh@student.42.fr>          +#+  +:+       +#+        */
+/*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/13 17:20:56 by maboulkh          #+#    #+#             */
-/*   Updated: 2023/11/13 22:29:39 by maboulkh         ###   ########.fr       */
+/*   Updated: 2023/11/14 03:14:49 by elasce           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
+#include <cstdio>
 
 using std::exception;
 using std::string;
@@ -39,7 +40,6 @@ class CgiExceptions : public exception
 class Cgi
 {
     private:
-    string ENV;
     string PATH_INFO;
     string PATH_TRANSLATED;
     string QUERY_STRING;
@@ -55,8 +55,13 @@ class Cgi
     string HTTP_COOKIE;
     string HTTP_USER_AGENT;
 
-    std::ofstream out;
-    std::ifstream in;
+    std::string body;
+    std::string bodyLength;
+    std::string *arg;
+    std::string *env;
+    std::string path;
+    std::FILE* out;
+    std::FILE* in;
     
 
     public:
@@ -73,4 +78,7 @@ class Cgi
         Cgi();
         Cgi(const char *host, const char *port);
         ~Cgi();
+        
+        lunchScript();
+        makeEnv();
 };
