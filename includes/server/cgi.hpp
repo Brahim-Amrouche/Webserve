@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maboulkh <maboulkh@student.42.fr>          +#+  +:+       +#+        */
+/*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/13 17:20:56 by maboulkh          #+#    #+#             */
-/*   Updated: 2023/11/14 22:36:30 by maboulkh         ###   ########.fr       */
+/*   Updated: 2023/11/15 01:26:42 by elasce           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,13 @@ class Cgi
     std::string *arg;
     std::string *env;
     std::string path;
-    std::FILE* out;
-    std::FILE* in;
+    std::string inFileName;
+    std::string outFileName;
+    // std::FILE* out;
+    // std::FILE* in;
+    TempFile *in;
+    TempFile *out;
+
 
     public:
         // class CgiOpenInFileFailed: public CgiExceptions
@@ -89,4 +94,5 @@ class Cgi
         void lunchScript();
         void makeEnv();
         void prepareFiles();
+        void createFile(std::string& file);
 };
