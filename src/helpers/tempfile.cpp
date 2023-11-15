@@ -6,7 +6,7 @@
 /*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 00:45:15 by elasce            #+#    #+#             */
-/*   Updated: 2023/11/15 02:28:14 by elasce           ###   ########.fr       */
+/*   Updated: 2023/11/15 13:27:20 by elasce           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,11 @@ TempFile::TempFile(std::string& file, FILE* std) : fileName(file), std(std) {
         newFileName.insert(dotPos, ss.str());
     }
     fileName = newFileName;
-    fs = std::fopen(fileName.c_str(), "w+");
+    if (std == stdin)
+        fd = ::dup(0);
+    else if (std == stdout)
+        fd = ::dup(1);
+    fs = std::freopen(fileName.c_str(), "w+", std);
     if (!fs)
         ;//throw
 }
@@ -52,12 +56,20 @@ int TempFile::read(std::string &str) {
     return (n);
 }
 
-int TempFile::dup() {
-    std::fclose(fs);
+// int TempFile::dup() {
+//     std::fclose(fs);
+//     if (std == stdin)
+//         fs = std::freopen(fileName.c_str(), "r", std);
+//     else
+//         fs = std::freopen(fileName.c_str(), "w", std);
+// }
+
+int TempFile::resetFd() {
     if (std == stdin)
-        fs = std::freopen(fileName.c_str(), "r", std);
-    else
-        fs = std::freopen(fileName.c_str(), "w", std);
+        ::dup2(fd, 0);
+    else if (std == stdout)
+        ::dup2(fd, 1);
+    fd = -1;
 }
 
 int TempFile::write(std::string &str) {
@@ -65,6 +77,8 @@ int TempFile::write(std::string &str) {
 }
 
 TempFile::~TempFile() {
+    if (fd != -1)
+        resetFd();
     std::remove(fileName.c_str());
     std::fclose(fs);
 }

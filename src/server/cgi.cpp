@@ -6,7 +6,7 @@
 /*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/13 17:20:54 by maboulkh          #+#    #+#             */
-/*   Updated: 2023/11/15 02:55:36 by elasce           ###   ########.fr       */
+/*   Updated: 2023/11/15 13:30:53 by elasce           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,14 @@ Cgi::Cgi(void) : requestMap(NULL) {
         default:
             waitpid(pid, &status, WNOHANG);
     }
+    in->resetFd();
+    out->resetFd();
     out->read(body);
 }
 
 void Cgi::lunchScript(void) {
-    in->dup();
-    out->dup();
+    // in->dup();
+    // out->dup();
     if (chdir(path.c_str()) != 0)
         ;//throw
     execve(NULL, NULL, NULL);

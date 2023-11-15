@@ -6,7 +6,7 @@
 /*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 00:46:06 by elasce            #+#    #+#             */
-/*   Updated: 2023/11/15 02:23:08 by elasce           ###   ########.fr       */
+/*   Updated: 2023/11/15 13:39:30 by elasce           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 
 class TempFile {
     private:
+    int fd;
     std::FILE* fs;
     std::FILE* std;
     std::string fileName;
@@ -31,5 +32,6 @@ class TempFile {
     int write(std::string &str);
     int read(std::string &str);
     void rewind();
-    int dup();
+    // int dup();
+    int resetFd();
 };
