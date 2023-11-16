@@ -6,7 +6,7 @@
 /*   By: elasce <elasce@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/13 17:20:54 by maboulkh          #+#    #+#             */
-/*   Updated: 2023/11/15 13:30:53 by elasce           ###   ########.fr       */
+/*   Updated: 2023/11/16 01:55:49 by elasce           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,9 @@ CgiExceptions::~CgiExceptions() throw()
     delete Cgi_msg;
 }
 
-Cgi::Cgi(void) : requestMap(NULL) {
+Cgi::Cgi(void) : requestMap(NULL), envp(NULL) {
     in = new TempFile(inFileName, stdin);
     out = new TempFile(outFileName, stdout);
-    in->write(body);
     int status = 0;
     int pid = fork();
     switch (pid)
@@ -64,50 +63,59 @@ Cgi::Cgi(void) : requestMap(NULL) {
 void Cgi::lunchScript(void) {
     // in->dup();
     // out->dup();
+    in->write(body);
+    in->rewind();
     if (chdir(path.c_str()) != 0)
         ;//throw
-    execve(NULL, NULL, NULL);
+    execve(scriptPath.c_str(), NULL, envp);
 }
 
-// void Cgi::createFile(std::string& file, FILE* fileStream) {
-//     std::string originalFileName = file;
-//     std::string fileName = originalFileName;
-//     size_t dotPos = fileName.find_last_of('.');
-//     if (fileName.size() == 0)
-//         dotPos = 0;
-//     else if (dotPos != std::string::npos)
-//         dotPos = fileName.size() - 1;
-//     std::stringstream ss;
-//     for (int i = 1; access(fileName.c_str(), F_OK) == 0; i++)
-//     {
-//         ss << i;
-//         fileName = originalFileName;
-//         fileName.insert(dotPos, ss.str());
-//     }
-//     file = fileName;
-//     fileStream = std::freopen(fileName.c_str(), "w+", stdin);
-//     std::remove(fileName.c_str());
-// }
+void Cgi::makeEnv() { 
+    std::map<std::string, std::string> envMap;
+    
+    envMap["AUTH_TYPE"] = ""; //'auth-scheme' token in the request Authorization header field
+    envMap["CONTENT_LENGTH"] = ""; //body.length
+    envMap["CONTENT_TYPE"] = ""; // The server MUST set this meta-variable if an HTTP Content-Type field is present in the client request header.... otherwise it should omit this meta-variable
+    envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
+    envMap["PATH_INFO"] = ""; // "" + URI path
+    envMap["PATH_TRANSLATED"] = ""; // htdocs + path_info
+    // be werry of .. 
+    envMap["QUERY_STRING"] = ""; // The server MUST set this variable; if the Script-URI does not include a query component, the QUERY_STRING MUST be defined as an empty string ("").
+    envMap["REMOTE_ADDR"] = ""; //MUST be set to the network address of the client
+    envMap["REMOTE_HOST"] = ""; // not necessary and can be substituted by REMOTE_ADDR
+    envMap["REMOTE_IDENT"] = ""; //    envMap[""] = "";
+    envMap[""] = ""; // REQUEST.method (get/post)
+    envMap["SCRIPT_NAME"] = envMap["PATH_INFO"];
+    envMap["SERVER_NAME"] = ""; // hostname | ipv4-address | ( "[" ipv6-address "]" ) !!!! in case of virtual servers use the request's Host header field
+    envMap["SERVER_PORT"] = ""; // config.port
+    envMap["SERVER_PROTOCOL"] = "HTTP/1.1";
+    envMap["SERVER_SOFTWARE"] = "webserv/1.0";
 
-// void Cgi::prepareFiles() {
-//     bodyLength = body.length();
-//     in = new TempFile(inFileName, 0);
-//     out = new TempFile(outFileName, 1);
-//     in->write(body);
-//     in->rewind();
-// }
+    // Meta-Variables >> take request headers and preceed them with HTTP_ and upercase key
+    // remove Authorization and other already present value
+    // for (std::map<std::string, std::string>::iterator i = request.begin())
+        // envMap[request.first] = ((std::string) "HTTP_") + request.second.formated
 
-void Cgi::makeEnv() {
-    env = NULL;
-}
-
-Cgi::Cgi(const char *host, const char *port)
-{
-
+    envp = new char*[envMap.size() + 1];
+    int j = -1;
+    std::string data;
+    for (std::map<std::string, std::string>::iterator i = envMap.begin(); i != envMap.end(); i++) {
+        data = i->first + "=" + i->second;
+        envp[++j] = new char[data.size() + 1];
+        std::memmove(envp[j], data.c_str(), data.size());
+    }
+    //very confusing check later
+    scriptPath = envMap["PATH_TRANSLATED"];
+    //very confusing check later
 }
 
 Cgi::~Cgi()
 {
+    if (envp) {
+        for (int i = 0; envp[i]; i++)
+            delete envp[i];
+        delete[] envp;
+    }
     delete in;
     delete out;
 }
