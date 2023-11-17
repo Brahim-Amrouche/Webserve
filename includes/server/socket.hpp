@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:54:36 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/09 17:55:33 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/12 15:37:40 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
+#include <cstdlib>
+#include <csignal>
 
 
 typedef int SOCKET_ID;
