@@ -6,11 +6,11 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:42:43 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/04 11:54:18 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/15 01:29:19 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-
-
+#include "fileconfig.hpp"
+#include "serversconfig.hpp"

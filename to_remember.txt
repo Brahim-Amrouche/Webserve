@@ -1,4 +1,3 @@
 Hang the server and accept requests
 Listeners might be a variable number
 removed getnameinfo
-might need a client to be only checked for read or write at a time
