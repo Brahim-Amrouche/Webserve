@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 15:56:06 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 03:57:08 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 19:03:47 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,11 @@ LoadBalancer::LoadBalancer(vector<ServerSocket *> *socks):listeners(socks), even
     {
         cout << "try's" << endl;
         ft_memset(&(events[0]), 0, sizeof(EPOLL_EVENT));
-        (*it)->fill_epoll_event(&(events[0]), EPOLLIN);
+        (*it)->fill_epoll_event(&(events[0]), EPOLLIN | EPOLLET);
         if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, (*it)->get_sockid(), &(events[0])) == -1)
             throw EpollCtlFailed("Couldn't add the servers events listener", this);
         ++load;
-        it++;
+        ++it;
     }
     cout << "Load Balancer Initiated." << endl;
 }
@@ -80,41 +80,38 @@ void LoadBalancer::loop()
 
 int     find_sock_event(int event_fd, vector<ServerSocket *> *listeners)
 {
-    vector<ServerSocket *>::const_iterator it = listeners->begin();
-    vector<ServerSocket *>::const_iterator end = listeners->end();
-    while (it != end)
+    size_t i = -1;
+    while (++i < listeners->size())
     {
-        if ((*it)->get_sockid() == event_fd)
-            return (*it)->get_sockid();
+        if ((*listeners)[i]->get_sockid() == event_fd)
+            return i;
     }
     return -1;
 }
 
 void    LoadBalancer::handle_clients_request()
 {
-    int     i = -1;
+    int     i = -1, server_index;
+    Client *event_client;
     cout << "Request received (" << events_trigered << ")" << endl;
     while (++i < events_trigered)
     {
-        
-        if (find_sock_event(events[i].data.fd,listeners))
+        server_index = 0;
+        event_client = NULL;
+        cout << "index is:" << i << endl;
+        if ((server_index = find_sock_event(events[i].data.fd,listeners)) != -1)
         {
             cout << "making new connection with event :"  << i << endl;
             if (events[i].events & EPOLLIN)
-                new_connection(i, events[i].data.fd);
+                new_connection(i, server_index);
         }
-        else
+        else if((event_client = Client::find_client_by_socketid(clients, events[i].data.fd)) != NULL)
         {
-            cout << "exchaging request with event :" << i << endl;
-            Client *event_client = Client::find_client_by_socketid(clients, events[i].data.fd);
-            if (event_client)
-            {
-                bool client_alive;
-                if (events[i].events & EPOLLIN)
-                    client_alive = receive(event_client);
-                if (client_alive && (events[i].events & EPOLLOUT))
-                    send(event_client);
-            }
+            bool client_alive;
+            if (events[i].events & EPOLLIN)
+                client_alive = receive(event_client);
+            else if (client_alive && (events[i].events & EPOLLOUT))
+                send(event_client);
         }
     }
 }
@@ -127,7 +124,8 @@ void LoadBalancer::new_connection(int event_id, int server_index)
         Client *new_client = new Client(new_client_socket, (*listeners)[server_index], NULL);
         if (!new_client)
             throw CreatingClientFailed("Couldn't add a new client");
-        new_client_socket->fill_epoll_event(&(events[event_id]), EPOLLIN | EPOLLOUT );
+        ft_memset(&(events[event_id]), 0, sizeof(EPOLL_EVENT));
+        new_client_socket->fill_epoll_event(&(events[event_id]), EPOLLIN | EPOLLOUT | EPOLLET);
         if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, new_client_socket->get_sockid(), &(events[event_id])) == -1)
             throw EpollCtlFailed("Unable to Track a new Client", NULL);
         ft_memset(&(events[event_id]), 0, sizeof(EPOLL_EVENT));
@@ -205,4 +203,5 @@ LoadBalancer::~LoadBalancer()
         close(epoll_fd);
     if (clients)
         Client::remove_all(clients);
+    cleanup.load_balancer = NULL;
 }

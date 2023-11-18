@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 01:30:05 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 02:41:36 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 19:04:08 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,9 @@ UServerConfig::UServerConfig(const bool is_vec):u_vec(is_vec)
 UServerConfig::~UServerConfig()
 {
     if (u_vec)
+    {   
         delete vec;
+    }
     else
     {
         for (vector<Location *>::const_iterator it = obj->begin(); it != obj->end(); it++)
@@ -100,12 +102,58 @@ Server::Server(vector<string> &new_tokens):ServerConfigs(false), tokens(new_toke
     try 
     {
         parseTokens();
+        mergeServers();
     }
     catch (const ServerConfigError &e)
     {
         cerr << e.what() << endl;
     }
-    
+    catch (const Socket::AddressLookUpFailed &e)
+    {
+        cerr << e.what() << endl;
+    }
+    catch (const SockExceptions &e)
+    {
+        cerr << e.what() << endl;
+    }
+}
+
+bool Server::config_exists(string &host, string &port) const
+{
+    size_t i = -1;
+    while (++i < server_sockets.size())
+    {
+        string &cmp_host = server_sockets[i]->configs[0]->directives[LISTEN]->vec->at(0);
+        string &cmp_port = server_sockets[i]->configs[0]->directives[LISTEN]->vec->at(1);
+        if (cmp_host == host && cmp_port == port)
+            return true;
+    }
+    return false;
+}
+
+void Server::mergeServers()
+{
+    size_t i = -1,j;
+    while (++i < servers.size())
+    {
+        j = i;
+        string &n_host = servers[i]->directives[LISTEN]->vec->at(0);
+        string &n_port = servers[i]->directives[LISTEN]->vec->at(1);
+        if(config_exists(n_host,n_port))
+            continue;
+        ServerSocket *n_srv_sock = new ServerSocket(n_host.c_str(), n_port.c_str());
+        n_srv_sock->sockBind();
+        n_srv_sock->sockListen();
+        n_srv_sock->configs.push_back(servers[i]);
+        while(++j < servers.size())
+        {
+            string &o_host= servers[j]->directives[LISTEN]->vec->at(0);
+            string &o_port= servers[j]->directives[LISTEN]->vec->at(1);
+            if (o_host == n_host && o_port == o_port)
+                n_srv_sock->configs.push_back(servers[j]);
+        }
+        server_sockets.push_back(n_srv_sock);
+    }
 }
 
 bool    restrict_params(vector <string> &tokens, size_t &i,size_t params_count ,const string limiters)
@@ -239,8 +287,9 @@ Server::~Server()
 {
     size_t i = -1;
     while (++i < servers.size())
-    {
-        if (servers[i])
-            delete servers[i];
-    }
+        delete servers[i];
+    i = -1;
+    while (++i < server_sockets.size())
+        delete server_sockets[i];
+    cleanup.servers = NULL;
 }

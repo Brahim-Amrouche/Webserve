@@ -6,13 +6,15 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/14 23:07:19 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/17 18:51:05 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 18:35:01 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "fileconfig.hpp"
+
+class ServerSocket;
 
 typedef enum e_gloabl_configs
 {
@@ -91,9 +93,11 @@ class Server : public ServerConfigs
         vector<string> &tokens;
     public:
         vector<ServerConfigs *> servers;
+        vector<ServerSocket  *> server_sockets;
         Server(vector<string> &new_tokens);
         void parseTokens();
+        void mergeServers();
+        bool config_exists(string &host, string &port) const;
         void validate_allowed_methods(vector<string> &tokens, size_t &i, map<int, TServerConfig *> &directive);
-        
         ~Server();
 };

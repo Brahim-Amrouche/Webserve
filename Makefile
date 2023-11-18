@@ -2,7 +2,7 @@ NAME = webserv
 
 INCLUDES = -I./includes
 
-FLAGS = -Wall -Wextra -Werror -std=c++98 ${INCLUDES} -fsanitize=address,undefined
+FLAGS = -Wall -Wextra -Werror -std=c++98 ${INCLUDES} -g -fsanitize=address,undefined
 
 SRCS = ${wildcard ./src/**/*.cpp} ${wildcard ./src/*.cpp} ${wildcard ./*.cpp}
 

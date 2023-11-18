@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 19:03:03 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 03:19:04 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 18:18:17 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,7 @@
 
 typedef struct s_cleanupdata
 {
-    Server *servers_conf;
-    MergedServers *merged_serv;
-    Socket *server_sock;
+    Server *servers;
     LoadBalancer *load_balancer;
 } t_cleanupdata;
 

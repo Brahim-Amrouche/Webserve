@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 17:21:01 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 00:14:59 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 17:31:05 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,12 +142,4 @@ ServerSocket::ServerSocket(const char *host,const char *port):Socket(host, port)
 {}
 
 ServerSocket::~ServerSocket()
-{
-    vector<ServerConfigs *>::const_iterator it = configs.begin();
-    vector<ServerConfigs *>::const_iterator end = configs.end();
-    while (it != end)
-    {
-        delete *it;
-        it++;
-    }
-}
+{}

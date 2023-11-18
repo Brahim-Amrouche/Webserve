@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/12 19:46:43 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/15 18:46:20 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 18:45:01 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,16 +31,13 @@ ConfigParsingError::ConfigParsingError(const string parsing_error): ConfigExcept
 
 ConfigFile::ConfigFile(const string config_path):config_file(config_path.c_str()) , brakets(0)
 {
-    if (!config_file.is_open())
-        throw WrongConfigFile();
-    string line;
-    while (getline(config_file, line))
-        tokenizeLine(line);
     try
     {
-        // size_t i = -1;
-        // while (++i < tokens.size())
-        //     cout <<  "|" << tokens[i] << "|" << endl;
+        if (!config_file.is_open())
+            throw WrongConfigFile();
+        string line;
+        while (getline(config_file, line))
+            tokenizeLine(line);
         validateTokens();
     }
     catch (const ConfigParsingError &e)

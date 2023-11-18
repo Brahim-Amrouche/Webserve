@@ -6,23 +6,19 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:16:19 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 03:51:32 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 19:04:32 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-t_cleanupdata cleanup = {NULL, NULL,  NULL, NULL};
+t_cleanupdata cleanup = {NULL, NULL};
 
 void    sigIntHandler(int signum)
 {
     cout << "Server Shuting Down." << endl;
-    if (cleanup.servers_conf)
-        delete cleanup.servers_conf;
-    if (cleanup.merged_serv)
-        delete cleanup.merged_serv;
-    if (cleanup.server_sock)
-        delete cleanup.server_sock;
+    if (cleanup.servers)
+        delete cleanup.servers;
     if (cleanup.load_balancer)
         delete cleanup.load_balancer;
     exit(signum);
@@ -36,16 +32,16 @@ int main(int argc, char *argv[])
         cerr << "Couldn't add SignInt Handler" << endl;
         return (1);
     }
+    Server *merged_servers = NULL;
+    LoadBalancer *load = NULL;
     try {
-        MergedServers *merged_servers = configuration(argc, argv);
-        LoadBalancer *load = new LoadBalancer(&merged_servers->server_sockets);
+        merged_servers = configuration(argc, argv);
+        cleanup.servers = merged_servers;
+        load = new LoadBalancer(&merged_servers->server_sockets);
+        cleanup.load_balancer = load;
         load->loop();
     }
-    catch (const Socket::AddressLookUpFailed &e)
-    {
-        cerr << e.what() << endl;
-    }
-    catch (const SockExceptions &e)
+    catch (const WrongConfigFile &e)
     {
         cerr << e.what() << endl;
     }
@@ -61,5 +57,5 @@ int main(int argc, char *argv[])
     {
         cerr << e.what() << endl;
     }
-    return (1);
+    sigIntHandler(1);
 }
