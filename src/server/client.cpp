@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/12 09:38:13 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 01:40:33 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,10 @@ Client::ClientRemovalFailed::ClientRemovalFailed(const string addr, const Client
 Client::ClientReceiveFailed::ClientReceiveFailed(const string addr): ClientExceptions(addr, "Receive request interrupted (", NULL)
 {};
 
-Client::Client():socket(NULL), received(0), next(NULL)
+Client::Client():socket(NULL), server_sock(NULL), own_conf(NULL), received(0), next(NULL)
 {};
 
-Client::Client(Socket *new_socket): socket(new_socket), received(0)
+Client::Client(Socket *new_socket, ServerSocket *new_serv, ServerConfigs *new_conf): socket(new_socket), server_sock(new_serv), own_conf(new_conf), received(0)
     , next(NULL)
 {
     cout << "Created Client with socket id (" << socket->get_sockid() << ")" << endl;

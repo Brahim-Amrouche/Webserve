@@ -6,17 +6,21 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:16:19 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/17 01:55:42 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 03:51:32 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-t_cleanupdata cleanup = {NULL,  NULL};
+t_cleanupdata cleanup = {NULL, NULL,  NULL, NULL};
 
 void    sigIntHandler(int signum)
 {
     cout << "Server Shuting Down." << endl;
+    if (cleanup.servers_conf)
+        delete cleanup.servers_conf;
+    if (cleanup.merged_serv)
+        delete cleanup.merged_serv;
     if (cleanup.server_sock)
         delete cleanup.server_sock;
     if (cleanup.load_balancer)
@@ -24,17 +28,38 @@ void    sigIntHandler(int signum)
     exit(signum);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    // ConfigFile x("./config/default.conf");
-    // Server s(x.get_tokens());
+
     if (signal(SIGINT, sigIntHandler) == SIG_ERR)
     {
         cerr << "Couldn't add SignInt Handler" << endl;
         return (1);
     }
-    Socket *server = server_init("", "8080");
-    if (!server)
-        return (1);
-    server_listen(server);
+    try {
+        MergedServers *merged_servers = configuration(argc, argv);
+        LoadBalancer *load = new LoadBalancer(&merged_servers->server_sockets);
+        load->loop();
+    }
+    catch (const Socket::AddressLookUpFailed &e)
+    {
+        cerr << e.what() << endl;
+    }
+    catch (const SockExceptions &e)
+    {
+        cerr << e.what() << endl;
+    }
+    catch (const LoadBalancer::EpollInitFailed &e)
+    {
+        cerr << e.what() << endl;
+    }
+    catch (const LoadBalancer::EpollCtlFailed &e)
+    {
+        cerr << e.what() << endl;
+    }
+    catch (const LoadBalancer::EpollWaitFailed &e)
+    {
+        cerr << e.what() << endl;
+    }
+    return (1);
 }

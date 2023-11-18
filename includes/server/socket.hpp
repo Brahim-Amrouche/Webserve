@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:54:36 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/12 15:37:40 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/17 23:49:40 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,3 +102,12 @@ class Socket
         string  getSocketInfo() const;
         ~Socket();
 };
+
+class ServerSocket: public Socket
+{
+    public:
+        vector<ServerConfigs *> configs;
+        ServerSocket(const char *host, const char *port);
+        ~ServerSocket(); 
+};
+

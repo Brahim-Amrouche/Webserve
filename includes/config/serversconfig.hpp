@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/14 23:07:19 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/17 01:40:58 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/17 18:51:05 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,9 @@ typedef enum e_gloabl_configs
     AUTOINDEX,
     INDEX,
     LOCATION,
+    EXEC_CGI,
 } t_global_configs;
+
 
 typedef enum e_code_types
 {
@@ -43,6 +45,21 @@ class ServerConfigError : public ConfigException
         ServerConfigError(const string server_error);
 };
 
+typedef struct UServerConfig TServerConfig;
+
+class Location
+{
+    private:
+        map<int, TServerConfig *> *origin;
+        map<int, TServerConfig *> *overload;
+        const string  route;
+    public:
+        Location(const string new_route, map<int,
+            TServerConfig *> *orig, map<int, TServerConfig *> *loc);
+        map<int, TServerConfig *> *getLocationConf() const;
+        ~Location();  
+};
+
 typedef struct UServerConfig
 {
     bool u_vec;
@@ -51,7 +68,7 @@ typedef struct UServerConfig
     union
     {
         vector<string> *vec;
-        map<int, vector<string> > *obj;
+        vector<Location *> *obj;
     };
     
     UServerConfig(const bool is_vec);
@@ -63,6 +80,7 @@ class ServerConfigs
     public:
         map<int, TServerConfig *> directives;
         TServerConfig *add_dir_str(const string dir_str ,bool reoccures ,int params);
+        TServerConfig *add_location(const string location_path, map<int, TServerConfig *> *origin);
         ServerConfigs(bool empty);
         ~ServerConfigs();
 };
@@ -71,10 +89,11 @@ class Server : public ServerConfigs
 {
     private:
         vector<string> &tokens;
-        vector<ServerConfigs *> servers;
     public:
+        vector<ServerConfigs *> servers;
         Server(vector<string> &new_tokens);
         void parseTokens();
         void validate_allowed_methods(vector<string> &tokens, size_t &i, map<int, TServerConfig *> &directive);
+        
         ~Server();
 };

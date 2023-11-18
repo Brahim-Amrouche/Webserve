@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/12 15:54:49 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/15 16:42:58 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/17 17:50:29 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ class ConfigFile
         vector<string> tokens;
         int brakets;
     public:
+        ConfigFile();
         ConfigFile(const string config_path);
         void          tokenizeLine(const string line);
         void          validateTokens();

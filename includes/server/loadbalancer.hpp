@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:48:34 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/12 09:49:37 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 01:30:48 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class LoadBalancerExceptions : public exception
 class LoadBalancer
 {
     private:
-        Socket *listener;
+        vector<ServerSocket *> *listeners;
         int     epoll_fd;
         EPOLL_EVENT events[MAX_EVENTS];
         int  events_trigered;
@@ -67,9 +67,9 @@ class LoadBalancer
             public:
                 LoadBalancerOutOfMemory(const string msg);
         };
-        LoadBalancer(Socket *server);
+        LoadBalancer(vector<ServerSocket *> *socks);
         void loop();
-        void new_connection(int event_id);
+        void new_connection(int event_id, int server_index);
         void handle_clients_request();
         bool receive(Client *sender);
         void send(Client *receiver);
