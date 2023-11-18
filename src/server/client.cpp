@@ -6,7 +6,7 @@
 /*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/17 04:00:41 by nbarakat         ###   ########.fr       */
+/*   Updated: 2023/11/18 03:55:33 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,53 +76,6 @@ SOCKET_ID Client::get_socketid() const
     return socket->get_sockid();
 }
 
-void get_headers(char   *request, std::map<std::string, std::string> &headers)
-{
-    std::string line;
-    std::istringstream requestStream(request);
-    while (getline(requestStream, line) && line != "\r")
-    {
-        size_t colonPos = line.find(": ");
-        if (colonPos != std::string::npos)
-        {
-            std::string key = line.substr(0, colonPos);
-            std::string value = line.substr(colonPos + 2);
-            headers[key] = value;
-        }
-    }
-}
-
-bool is_valid_method(std::string& method)
-{
-    return method == "GET" || method == "POST" || method == "DELETE";
-}
-
-bool is_valid_http_version(std::string& version)
-{
-    return version == "HTTP/1.1";
-}
-
-void    parse_req_line(char *request)
-{
-    std::istringstream requestStream(request);
-    HttpRequest request_obj;
-    std::getline(requestStream, request_obj.method, ' ');
-    std::getline(requestStream, request_obj.path, ' ');
-    std::getline(requestStream, request_obj.httpVersion, '\r');
-    cout << request_obj.path<< endl<< endl<< endl<< endl<< endl<< endl;
-    if (!is_valid_method(request_obj.method) || !is_valid_http_version(request_obj.httpVersion))
-        throw Client::ClientReceiveFailed("http version / method error");
-}
-
-void parse_request(char *request,  std::map<std::string, std::string> &headers)
-{
-   get_headers(request, headers);
-   parse_req_line(request);
-}
-bool isHttpRequestComplete(const std::string& receivedData)
-{
-    return receivedData.find("\r\n\r\n") != std::string::npos;
-}
 void Client::receive()
 {
     std::map<std::string, std::string> headers;
@@ -138,14 +91,16 @@ void Client::receive()
     }
     if (r == MAX_REQUEST_SIZE)
         throw ClientReceiveFailed("Max Headers size");
-    if (isHttpRequestComplete(request))
+    if (isHttpRequestComplete(request))  ////
+    {
         parse_request(request, headers);
-
+        r = 0;
+    }
 }
 
 void Client::send_response()
 {
-    cout << "Sending response on socket (" << socket->get_sockid() << ")" << endl;
+    // cout << "Sending response on socket (" << socket->get_sockid() << ")" << endl;
     const char* response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!";
     send(socket->get_sockid(), response, ft_strlen(response), 0);
 }

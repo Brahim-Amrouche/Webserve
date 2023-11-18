@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 19:03:03 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/16 19:16:21 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 00:17:38 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "./config/config.hpp"
 #include "./helpers/helpers.hpp"
 #include "./server/server.hpp"
-
+#include "./server/request.hpp"
 
 
 typedef struct s_cleanupdata

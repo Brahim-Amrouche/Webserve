@@ -6,7 +6,7 @@
 /*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 16:17:32 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/17 03:23:09 by nbarakat         ###   ########.fr       */
+/*   Updated: 2023/11/18 02:13:31 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,7 @@
 #define MAX_REQUEST_SIZE 4096
 
 class Client;
-struct HttpRequest {
-    std::string method;
-    std::string path;
-    std::string httpVersion;
-};
+
 
 class ClientExceptions : public exception
 {
@@ -36,7 +32,7 @@ class Client
 {
     private :
         Socket *socket;
-        char   request[MAX_REQUEST_SIZE];
+        char   request[MAX_REQUEST_SIZE + 1];
         int    received;
         Client *next;
     public:

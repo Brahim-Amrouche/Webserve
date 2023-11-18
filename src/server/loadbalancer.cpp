@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   loadbalancer.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 15:56:06 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/12 15:49:38 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 02:30:34 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,18 +74,18 @@ void LoadBalancer::loop()
 void    LoadBalancer::handle_clients_request()
 {
     int     i = -1;
-    cout << "Request received (" << events_trigered << ")" << endl;
+    // cout << "Request received (" << events_trigered << ")" << endl;
     while (++i < events_trigered)
     {
         if (events[i].data.fd == listener->get_sockid())
         {
-            cout << "making new connection with event :"  << i << endl;
+            // cout << "making new connection with event :"  << i << endl;
             if (events[i].events & EPOLLIN)
                 new_connection(i);
         }
         else
         {
-            cout << "exchaging request with event :" << i << endl;
+            // cout << "exchaging request with event :" << i << endl;
             Client *event_client = Client::find_client_by_socketid(clients, events[i].data.fd);
             if (event_client)
             {
