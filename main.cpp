@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:16:19 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/17 01:55:42 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 21:39:42 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ void    sigIntHandler(int signum)
         delete cleanup.server_sock;
     if (cleanup.load_balancer)
         delete cleanup.load_balancer;
-    exit(signum);
+    // exit(signum);
+    (void) signum;
 }
 
 int main()

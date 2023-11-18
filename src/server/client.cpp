@@ -6,7 +6,7 @@
 /*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 03:55:33 by nbarakat         ###   ########.fr       */
+/*   Updated: 2023/11/18 20:56:06 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,11 @@ SOCKET_ID Client::get_socketid() const
     return socket->get_sockid();
 }
 
+
 void Client::receive()
 {
     std::map<std::string, std::string> headers;
+    bool header = 0;
     
     cout << "Receiving request on socket (" << socket->get_sockid() << ")" << endl;
     int r = recv(socket->get_sockid(), request, MAX_REQUEST_SIZE - received, 0);
@@ -91,12 +93,16 @@ void Client::receive()
     }
     if (r == MAX_REQUEST_SIZE)
         throw ClientReceiveFailed("Max Headers size");
-    if (isHttpRequestComplete(request))  ////
-    {
-        parse_request(request, headers);
-        r = 0;
-    }
+    if (header == 0)
+        treatHeader(header, request, headers); // do not reset r -- gotta keep reading till header is all in
+    else
+        addToBody(request); 
 }
+    // if (isHttpRequestComplete(request)) 
+    // {
+    //     parse_request(request, headers);
+    //     r = 0;
+    // }
 
 void Client::send_response()
 {
