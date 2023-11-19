@@ -6,12 +6,11 @@
 /*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 00:16:40 by nbarakat          #+#    #+#             */
-/*   Updated: 2023/11/18 22:07:50 by nbarakat         ###   ########.fr       */
+/*   Updated: 2023/11/18 23:36:09 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/webserv.hpp"
-#include <cstring>
 
 void saveBodyToFile(std::string body, std::string filename)
 {
@@ -139,7 +138,6 @@ void treatHeader(bool &header, char *request, std::map<std::string, std::string>
 
 void addToBody(char *request)
 {
-    return ;
     std::ostringstream bodyStream;
     std::string body;
     std::istringstream requestStream(request);

@@ -6,7 +6,7 @@
 /*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:16:19 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 21:39:42 by nbarakat         ###   ########.fr       */
+/*   Updated: 2023/11/18 23:32:17 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@ void    sigIntHandler(int signum)
         delete cleanup.server_sock;
     if (cleanup.load_balancer)
         delete cleanup.load_balancer;
-    // exit(signum);
-    (void) signum;
+    exit(signum);
 }
 
 int main()

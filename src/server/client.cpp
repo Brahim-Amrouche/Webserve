@@ -6,7 +6,7 @@
 /*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 20:56:06 by nbarakat         ###   ########.fr       */
+/*   Updated: 2023/11/18 23:12:06 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,11 +98,6 @@ void Client::receive()
     else
         addToBody(request); 
 }
-    // if (isHttpRequestComplete(request)) 
-    // {
-    //     parse_request(request, headers);
-    //     r = 0;
-    // }
 
 void Client::send_response()
 {

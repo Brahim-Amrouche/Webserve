@@ -6,17 +6,19 @@
 /*   By: nbarakat <nbarakat@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 00:16:28 by nbarakat          #+#    #+#             */
-/*   Updated: 2023/11/18 21:00:52 by nbarakat         ###   ########.fr       */
+/*   Updated: 2023/11/18 23:38:19 by nbarakat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #include <sys/stat.h>
+#include <cstring>
 
 struct HttpRequest {
     std::string method;
     std::string path;
     std::string httpVersion;
+    
 };
 
 
