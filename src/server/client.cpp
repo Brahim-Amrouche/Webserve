@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 01:40:33 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/20 04:48:27 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,13 @@ Client::ClientRemovalFailed::ClientRemovalFailed(const string addr, const Client
 Client::ClientReceiveFailed::ClientReceiveFailed(const string addr): ClientExceptions(addr, "Receive request interrupted (", NULL)
 {};
 
-Client::Client():socket(NULL), server_sock(NULL), own_conf(NULL), received(0), next(NULL)
+Client::ClientSendFailed::ClientSendFailed(const string addr): ClientExceptions(addr, "Send Request failed (", NULL)
+{}
+
+Client::Client():socket(NULL), server_sock(NULL), own_conf(NULL), req(NULL), next(NULL)
 {};
 
-Client::Client(Socket *new_socket, ServerSocket *new_serv, ServerConfigs *new_conf): socket(new_socket), server_sock(new_serv), own_conf(new_conf), received(0)
+Client::Client(Socket *new_socket, ServerSocket *new_serv, ServerConfigs *new_conf): socket(new_socket), server_sock(new_serv), own_conf(new_conf), req(NULL)
     , next(NULL)
 {
     cout << "Created Client with socket id (" << socket->get_sockid() << ")" << endl;
@@ -56,10 +59,7 @@ void Client::add_client(Client *new_client)
 }
 
 
-void Client::reset_request()
-{
-    received = 0;
-}
+
 
 Client *Client::get_next() const
 {
@@ -78,14 +78,39 @@ SOCKET_ID Client::get_socketid() const
 
 void Client::receive()
 {
-    cout << "Receiving request on socket (" << socket->get_sockid() << ")" << endl;
-    int r = recv(socket->get_sockid(), request, MAX_REQUEST_SIZE - received, 0);
+    char rcv_buffer[MAX_HEADERS_SIZE + 1] = {0};
+    if (!req)
+        req = new Request(0);
+    streamsize &headerReceived  = req->getHeaderSize();
+    string &headers_content = req->getBuffer();
+    ssize_t r = recv(socket->get_sockid(), rcv_buffer, MAX_HEADERS_SIZE - headerReceived , 0);
     if (r <= 0)
         throw ClientReceiveFailed("0.0.0.0");
     else
     {
-        received += r;
-        request[received] = 0;
+        rcv_buffer[r] = 0;
+        if (!req->headers_done)
+        {
+            headerReceived += r;
+            headers_content += rcv_buffer;
+            try {
+                if (req->HttpRequestComplete(r))
+                    req->parseHttpHeaders();
+            }
+            catch (const RequestHttpError &e)
+            {
+                cerr << e.what() << endl;
+                throw ClientReceiveFailed("Http error");
+            }
+        }
+        else
+        {
+            streamsize &body_read = req->getBodyRead();
+            streamsize &body_size = req->getBodySize();
+            body_read = r;
+            body_size -= body_read;
+            (*req) << rcv_buffer;
+        }
     }
 }
 
@@ -93,7 +118,10 @@ void Client::send_response()
 {
     cout << "Sending response on socket (" << socket->get_sockid() << ")" << endl;
     const char* response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!";
-    send(socket->get_sockid(), response, ft_strlen(response), 0);
+    int s = send(socket->get_sockid(), response, ft_strlen(response), 0);
+    // if (s < 0)
+    //     throw ClientSendFailed("Couldn't send response");
+    (void) s;
 }
 
 void Client::remove_client(Client **root,  Client *del_client)
@@ -139,4 +167,6 @@ Client::~Client()
 {
     if (socket)
         delete socket;
+    if (req)
+        delete req;
 }

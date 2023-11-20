@@ -23,6 +23,7 @@ clean :
 
 fclean : clean
 	rm -rf $(NAME)
+	rm -rf ${wildcard ./tmp/*.tmp}
 
 re : fclean all
 

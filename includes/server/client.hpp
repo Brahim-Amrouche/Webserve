@@ -6,14 +6,14 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 16:17:32 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 01:38:27 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/19 15:51:48 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "./socket.hpp"
-#define MAX_REQUEST_SIZE 2048
+
 
 class Client;
 
@@ -33,8 +33,7 @@ class Client
         Socket *socket;
         ServerSocket *server_sock;
         ServerConfigs *own_conf;
-        char   request[MAX_REQUEST_SIZE];
-        int    received;
+        Request *req;
         Client *next;
     public:
         class ClientRemovalFailed : public ClientExceptions
@@ -47,6 +46,11 @@ class Client
             public :
                 ClientReceiveFailed(const string addr);
         };
+        class ClientSendFailed : public ClientExceptions
+        {
+            public :
+                ClientSendFailed(const string addr);
+        };
         Client();
         Client(Socket *new_socket, ServerSocket *new_serv, ServerConfigs *new_conf);
         void add_client(Client *new_client);
@@ -55,7 +59,6 @@ class Client
         SOCKET_ID get_socketid() const;
         void receive();
         void send_response();
-        void reset_request();
         static void remove_client(Client **root, Client *del_client);
         static void remove_all(Client *root_client);
         static Client *find_client_by_socketid(Client *root, SOCKET_ID id);

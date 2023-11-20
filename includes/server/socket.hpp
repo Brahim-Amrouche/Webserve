@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 11:54:36 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/17 23:49:40 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/18 21:12:42 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ using std::ostringstream;
 using std::cerr;
 using std::cout;
 using std::endl;
+using std::exit;
 
 class Socket;
 

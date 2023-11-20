@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/04 19:03:03 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/18 18:18:17 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/20 04:16:38 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,3 +25,4 @@ typedef struct s_cleanupdata
 } t_cleanupdata;
 
 extern t_cleanupdata cleanup;
+void    sigIntHandler(int signum);

@@ -1,1 +1,3 @@
-signIntHandler added
+Request should have << operator
+Request only generates the file when there is a body
+Uses the Headers Buffer
