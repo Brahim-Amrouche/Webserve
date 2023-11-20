@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 16:28:11 by bamrouch          #+#    #+#             */
-/*   Updated: 2023/11/20 04:48:27 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/20 05:24:23 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void Client::receive()
             }
         }
         else
-        {
+        {  
             streamsize &body_read = req->getBodyRead();
             streamsize &body_size = req->getBodySize();
             body_read = r;

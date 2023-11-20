@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 00:16:40 by nbarakat          #+#    #+#             */
-/*   Updated: 2023/11/20 04:53:32 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/20 05:32:33 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,7 @@ bool Request::HttpRequestComplete(ssize_t r)
 void Request::parseHttpHeaders()
 {
     string line;
-    std::istringstream requestStream(headers_content);
+    std::istringstream requestStream(headers_content, ios::binary);
     
     while (getline(requestStream, line) && line != "\r")
     {
@@ -268,13 +268,10 @@ void Request::parseHttpHeaders()
             headers[key] = value;
         }
     }
-
-    std::ostringstream bodyStream;
-    string body;
-
-    bodyStream << requestStream.rdbuf();
-    body = bodyStream.str();
-    (*this) << body.c_str();
+    
+    char buff[body_read];
+    requestStream.read(buff, body_read);
+    (*this) << buff;
 }
 
 void Request::operator<<(const char *buffer)

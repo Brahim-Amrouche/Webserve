@@ -6,7 +6,7 @@
 /*   By: bamrouch <bamrouch@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 00:16:28 by nbarakat          #+#    #+#             */
-/*   Updated: 2023/11/20 04:48:35 by bamrouch         ###   ########.fr       */
+/*   Updated: 2023/11/20 05:20:15 by bamrouch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ using std::stringstream;
 using std::ofstream;
 using std::streamoff;
 using std::streamsize;
+using std::streampos;
 
 struct HttpRequest {
     string method;
